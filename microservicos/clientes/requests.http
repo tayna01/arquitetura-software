@@ -1,0 +1,34 @@
+POST http://localhost:3003/clientes
+Content-Type: application/json
+
+{
+  "nome": "João",
+  "sobrenome": "Silva",
+  "telefone": "46999999999",
+  "email": "joao@email.com"
+}
+
+GET http://localhost:3003/clientes
+
+
+GET http://localhost:3003/clientes/1
+
+
+GET http://localhost:3003/clientes/999
+
+
+POST http://localhost:3003/clientes
+Content-Type: application/json
+
+{
+  "nome": "João"
+}
+
+POST http://localhost:3003/clientes
+Content-Type: application/json
+
+{
+  "nome": "João",
+  "sobrenome": "Silva",
+  "email": "joao@email.com"
+}
