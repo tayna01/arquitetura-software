@@ -72,42 +72,57 @@ app.get("/pedidos", async (req, res) => {
 });*/
 
 app.post("/pedidos", async (req, res) => {
-    const { produtoId, quantidade } = req.body;
+    const { cliente_id, produtos } = req.body;
 
-    if (!produtoId || !quantidade || quantidade <= 0) {
+    if (!cliente_id || !Array.isArray(produtos) || produtos.length === 0) {
         return res.status(400).json({
-            erro: "produtoId e quantidade válida são obrigatórios"
+            erro: "cliente_id e produtos são obrigatórios"
+        });
+    }
+
+    if (
+        produtos.some(p => !p.produto_id || !p.quantidade || p.quantidade <= 0)
+    ) {
+        return res.status(400).json({
+            erro: "Cada produto deve ter produto_id e quantidade válida"
         });
     }
 
     try {
-        const resposta = await axios.get(
-            `${PRODUTOS_URL}/produtos/${produtoId}`,
-            {
-                timeout: 3000
-            }
-        );
+        const itens = [];
+        let total = 0;
 
-        const produto = resposta.data;
-        const total = produto.preco * quantidade;
+        for (const item of produtos) {
+            const resposta = await axios.get(
+                `${PRODUTOS_URL}/produtos/${item.produto_id}`,
+                {
+                    timeout: 3000
+                }
+            );
+
+            const produto = resposta.data;
+            const subtotal = produto.preco * item.quantidade;
+
+            total += subtotal;
+
+            itens.push({
+                produto_id: produto.id,
+                nome_produto: produto.nome,
+                preco_unitario: produto.preco,
+                quantidade: item.quantidade,
+                subtotal
+            });
+        }
 
         const resultado = await db.query(
             `INSERT INTO pedidos (
-        produto_id,
-        nome_produto,
-        preco_unitario,
-        quantidade,
+        cliente_id,
+        produtos,
         total
       )
-      VALUES ($1, $2, $3, $4, $5)
+      VALUES ($1, $2, $3)
       RETURNING *`,
-            [
-                produto.id,
-                produto.nome,
-                produto.preco,
-                quantidade,
-                total
-            ]
+            [cliente_id, JSON.stringify(itens), total]
         );
 
         res.status(201).json(resultado.rows[0]);
@@ -118,14 +133,8 @@ app.post("/pedidos", async (req, res) => {
             });
         }
 
-        if (erro.code === "ECONNREFUSED" || erro.code === "ECONNABORTED") {
-            return res.status(503).json({
-                erro: "Serviço de Produtos indisponível"
-            });
-        }
-
-        return res.status(500).json({
-            erro: "Erro ao criar pedido"
+        return res.status(503).json({
+            erro: "Serviço de Produtos indisponível"
         });
     }
 });
@@ -173,10 +182,8 @@ async function criarTabela() {
     await db.query(`
         CREATE TABLE IF NOT EXISTS pedidos (
         id SERIAL PRIMARY KEY,
-        produto_id INTEGER NOT NULL,
-        nome_produto VARCHAR(100) NOT NULL,
-        preco_unitario NUMERIC(10, 2) NOT NULL,
-        quantidade INTEGER NOT NULL,
+        cliente_id INTEGER NOT NULL,
+        produtos JSONB NOT NULL,
         total NUMERIC(10, 2) NOT NULL
         )
     `);
