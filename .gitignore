@@ -24,3 +24,6 @@ logs/
 
 # Docker
 *.pid
+
+# Atividades / PDFs
+*.pdf
