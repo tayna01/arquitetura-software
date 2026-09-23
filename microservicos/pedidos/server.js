@@ -4,11 +4,9 @@ const db = require("./db");
 
 const app = express();
 
-const PRODUTOS_URL =
-    process.env.PRODUTOS_URL || "http://localhost:3001";
+const PRODUTOS_URL = "http://localhost:3001";
 
-const CLIENTES_URL =
-    process.env.CLIENTES_URL || "http://localhost:3003";
+const CLIENTES_URL = "http://localhost:3003";
 
 app.use(express.json());
 

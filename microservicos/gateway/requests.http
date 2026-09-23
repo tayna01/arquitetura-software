@@ -1,3 +1,26 @@
+### Criar cliente
+POST http://localhost:3000/clientes
+Content-Type: application/json
+
+{
+  "nome": "Maria",
+  "sobrenome": "Souza",
+  "telefone": "46988888888",
+  "email": "maria@email.com"
+}
+
+### Buscar clientes
+GET http://localhost:3000/clientes
+
+
+### Buscar cliente por id
+GET http://localhost:3000/clientes/2
+
+
+### Buscar cliente inexistente
+GET http://localhost:3000/clientes/999
+
+
 ### Criar produto
 POST http://localhost:3000/produtos
 Content-Type: application/json
@@ -15,9 +38,31 @@ POST http://localhost:3000/pedidos
 Content-Type: application/json
 
 {
-  "produtoId": 2,
-  "quantidade": 2
+  "cliente_id": 2,
+  "produtos": [
+    {
+      "produto_id": 3,
+      "quantidade": 1
+    }
+  ]
 }
 
 ### Listar pedidos
 GET http://localhost:3000/pedidos
+
+### Buscar pedido por ID
+GET http://localhost:3000/pedidos/3
+
+### Criar pedido com cliente inexistente
+POST http://localhost:3000/pedidos
+Content-Type: application/json
+
+{
+  "cliente_id": 999,
+  "produtos": [
+    {
+      "produto_id": 3,
+      "quantidade": 1
+    }
+  ]
+}

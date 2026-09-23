@@ -3,10 +3,10 @@ POST http://localhost:3003/clientes
 Content-Type: application/json
 
 {
-  "nome": "Luan",
-  "sobrenome": "Luan Gabriel da Silva Freitas",
+  "nome": "Tayná",
+  "sobrenome": "Vicente Silva",
   "telefone": "44998163459",
-  "email": "luan004@email.com"
+  "email": "taynavicente2019@gmail.com"
 }
 
 ### Buscar clientes
