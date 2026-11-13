@@ -1,22 +1,43 @@
+require("dotenv").config();
+
 const express = require("express");
 const axios = require("axios");
-const db = require("./db");
+const mongoose = require("mongoose");
+const connectDB = require("./db");
 
 const app = express();
 
-const PRODUTOS_URL = "http://localhost:3001";
+const PRODUTOS_URL =
+    process.env.PRODUTOS_URL || "http://localhost:3001";
 
-const CLIENTES_URL = "http://localhost:3003";
+const CLIENTES_URL =
+    process.env.CLIENTES_URL || "http://localhost:3003";
 
 app.use(express.json());
 
+connectDB();
+
+const itemPedidoSchema = new mongoose.Schema({
+    produto_id: Number,
+    nome_produto: String,
+    preco_unitario: Number,
+    quantidade: Number,
+    subtotal: Number
+}, { _id: false });
+
+const pedidoSchema = new mongoose.Schema({
+    cliente_id: Number,
+    produtos: [itemPedidoSchema],
+    total: Number
+});
+
+const Pedido = mongoose.model("Pedido", pedidoSchema);
+
 app.get("/pedidos", async (req, res) => {
     try {
-        const resultado = await db.query(
-            "SELECT * FROM pedidos ORDER BY id"
-        );
+        const resultado = await Pedido.find().sort({ _id: 1 });
 
-        res.json(resultado.rows);
+        res.json(resultado);
     } catch (erro) {
         res.status(500).json({
             erro: "Erro ao buscar pedidos"
@@ -86,18 +107,13 @@ app.post("/pedidos", async (req, res) => {
             });
         }
 
-        const resultado = await db.query(
-            `INSERT INTO pedidos (
-        cliente_id,
-        produtos,
-        total
-      )
-      VALUES ($1, $2, $3)
-      RETURNING *`,
-            [cliente_id, JSON.stringify(itens), total]
-        );
+        const pedido = await Pedido.create({
+            cliente_id,
+            produtos: itens,
+            total
+        });
 
-        res.status(201).json(resultado.rows[0]);
+        res.status(201).json(pedido);
     } catch (erro) {
         if (erro.response?.status === 404) {
             return res.status(400).json({
@@ -105,20 +121,21 @@ app.post("/pedidos", async (req, res) => {
             });
         }
 
-        return res.status(503).json({
-            erro: "Serviço de Produtos indisponível"
+        if (erro.code === "ECONNREFUSED" || erro.code === "ECONNABORTED") {
+            return res.status(503).json({
+                erro: "Serviço de Produtos indisponível"
+            });
+        }
+
+        return res.status(500).json({
+            erro: "Erro ao criar pedido"
         });
     }
 });
 
 app.get("/pedidos/:id", async (req, res) => {
     try {
-        const resultado = await db.query(
-            "SELECT * FROM pedidos WHERE id = $1",
-            [req.params.id]
-        );
-
-        const pedido = resultado.rows[0];
+        const pedido = await Pedido.findById(req.params.id);
 
         if (!pedido) {
             return res.status(404).json({
@@ -133,21 +150,6 @@ app.get("/pedidos/:id", async (req, res) => {
         });
     }
 });
-
-async function criarTabela() {
-    await db.query(`
-        CREATE TABLE IF NOT EXISTS pedidos (
-        id SERIAL PRIMARY KEY,
-        cliente_id INTEGER NOT NULL,
-        produtos JSONB NOT NULL,
-        total NUMERIC(10, 2) NOT NULL
-        )
-    `);
-
-    console.log("Tabela de pedidos pronta");
-}
-
-criarTabela();
 
 app.listen(3002, () => {
     console.log("Pedidos rodando na porta 3002");
