@@ -52,6 +52,86 @@ function gerarCodigoRastreio() {
     return `TRK-${parte}`;
 }
 
+app.get("/entregas", async (req, res) => {
+    try {
+        const entregas = await Entrega.find().sort({ _id: 1 });
+
+        res.json(entregas);
+    } catch (erro) {
+        res.status(500).json({
+            erro: "Erro ao listar entregas"
+        });
+    }
+});
+
+app.get("/entregas/pedido/:pedido_id", async (req, res) => {
+    try {
+        const entrega = await Entrega.findOne({
+            pedido_id: req.params.pedido_id
+        });
+
+        if (!entrega) {
+            return res.status(404).json({
+                erro: "Entrega não encontrada para este pedido"
+            });
+        }
+
+        res.json(entrega);
+    } catch (erro) {
+        res.status(500).json({
+            erro: "Erro ao buscar entrega do pedido"
+        });
+    }
+});
+
+app.get("/entregas/:id", async (req, res) => {
+    try {
+        const entrega = await Entrega.findById(req.params.id);
+
+        if (!entrega) {
+            return res.status(404).json({
+                erro: "Entrega não encontrada"
+            });
+        }
+
+        res.json(entrega);
+    } catch (erro) {
+        res.status(500).json({
+            erro: "Erro ao buscar entrega"
+        });
+    }
+});
+
+app.put("/entregas/:id/status", async (req, res) => {
+    const { status } = req.body;
+
+    if (!status || !STATUS_VALIDOS.includes(status)) {
+        return res.status(400).json({
+            erro: "Status inválido"
+        });
+    }
+
+    try {
+        const entrega = await Entrega.findByIdAndUpdate(
+            req.params.id,
+            { status },
+            { new: true }
+        );
+
+        if (!entrega) {
+            return res.status(404).json({
+                erro: "Entrega não encontrada"
+            });
+        }
+
+        res.json(entrega);
+    } catch (erro) {
+        res.status(500).json({
+            erro: "Erro ao atualizar status da entrega"
+        });
+    }
+});
+
 app.listen(3004, () => {
     console.log("Entregas rodando na porta 3004");
 });
