@@ -16,10 +16,10 @@ services:
     environment:
       PRODUTOS_URL: http://produtos:3001
       CLIENTES_URL: http://clientes:3003
-      DATABASE_URL: postgres://postgres:postgres@postgres:5432/pedidos_db
+      DATABASE_URL: mongodb://mongo:27017/pedidos_db
     depends_on:
-      postgres:
-        condition: service_healthy
+      mongo:
+        condition: service_started
       produtos:
         condition: service_started
       clientes:
@@ -35,6 +35,19 @@ services:
       postgres:
         condition: service_healthy
 
+  entregas:
+    build: ./entregas
+    ports:
+      - "3004:3004"
+    environment:
+      PEDIDOS_URL: http://pedidos:3002
+      DATABASE_URL: mongodb://mongo:27017/entregas_db
+    depends_on:
+      mongo:
+        condition: service_started
+      pedidos:
+        condition: service_started
+
   gateway:
     build: ./gateway
     ports:
@@ -43,10 +56,12 @@ services:
       PRODUTOS_URL: http://produtos:3001
       PEDIDOS_URL: http://pedidos:3002
       CLIENTES_URL: http://clientes:3003
+      ENTREGAS_URL: http://entregas:3004
     depends_on:
       - produtos
       - pedidos
       - clientes
+      - entregas
 
   postgres:
     image: postgres:16-alpine
@@ -65,5 +80,13 @@ services:
       timeout: 5s
       retries: 5
 
+  mongo:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
 volumes:
   postgres_data:
+  mongo_data:
