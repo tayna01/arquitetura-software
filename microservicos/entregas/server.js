@@ -160,6 +160,14 @@ app.post("/entregas", async (req, res) => {
         });
     }
 
+    const entregaExistente = await Entrega.findOne({ pedido_id });
+
+    if (entregaExistente) {
+        return res.status(409).json({
+            erro: "Entrega já cadastrada para este pedido"
+        });
+    }
+
     try {
         const entrega = await Entrega.create({
             pedido_id,
