@@ -14,6 +14,9 @@ const PEDIDOS_URL =
 const CLIENTES_URL =
     process.env.CLIENTES_URL || "http://localhost:3003";
 
+const ENTREGAS_URL =
+    process.env.ENTREGAS_URL || "http://localhost:3004";
+
 
 app.use("/produtos", async (req, res) => {
     try {
@@ -81,6 +84,28 @@ app.use("/clientes", async (req, res) => {
     }
 });
 
+
+app.use("/entregas", async (req, res) => {
+    try {
+        const resposta = await axios({
+            method: req.method,
+            url: `${ENTREGAS_URL}${req.originalUrl}`,
+            data: req.body,
+            params: req.query,
+            timeout: 5000
+        });
+
+        res.status(resposta.status).json(resposta.data);
+    } catch (erro) {
+        if (erro.response) {
+            return res.status(erro.response.status).json(erro.response.data);
+        }
+
+        return res.status(503).json({
+            erro: "Serviço de Entregas indisponível"
+        });
+    }
+});
 
 app.listen(3000, () => {
     console.log("Gateway rodando na porta 3000");
