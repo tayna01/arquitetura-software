@@ -132,6 +132,50 @@ app.put("/entregas/:id/status", async (req, res) => {
     }
 });
 
+app.post("/entregas", async (req, res) => {
+    const { pedido_id, endereco } = req.body;
+
+    if (!pedido_id || !endereco) {
+        return res.status(400).json({
+            erro: "pedido_id e endereco são obrigatórios"
+        });
+    }
+
+    try {
+        await axios.get(
+            `${PEDIDOS_URL}/pedidos/${pedido_id}`,
+            {
+                timeout: 3000
+            }
+        );
+    } catch (erro) {
+        if (erro.response?.status === 404) {
+            return res.status(400).json({
+                erro: "Pedido não encontrado"
+            });
+        }
+
+        return res.status(503).json({
+            erro: "Serviço de Pedidos indisponível"
+        });
+    }
+
+    try {
+        const entrega = await Entrega.create({
+            pedido_id,
+            endereco,
+            status: "PREPARANDO",
+            codigo_rastreio: gerarCodigoRastreio()
+        });
+
+        res.status(201).json(entrega);
+    } catch (erro) {
+        return res.status(500).json({
+            erro: "Erro ao cadastrar entrega"
+        });
+    }
+});
+
 app.listen(3004, () => {
     console.log("Entregas rodando na porta 3004");
 });
