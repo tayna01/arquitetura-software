@@ -1,4 +1,4 @@
-### 1. Criar cliente
+### Criar cliente
 POST http://localhost:3000/clientes
 Content-Type: application/json
 
@@ -8,7 +8,7 @@ Content-Type: application/json
   "email": "maria@email.com"
 }
 
-### 2. Criar produto
+### Criar produto
 POST http://localhost:3000/produtos
 Content-Type: application/json
 
@@ -17,7 +17,7 @@ Content-Type: application/json
   "preco": 150
 }
 
-### 3. Criar pedido (substitua cliente_id e produto_id pelos retornados acima)
+### Criar pedido
 POST http://localhost:3000/pedidos
 Content-Type: application/json
 
@@ -31,45 +31,34 @@ Content-Type: application/json
   ]
 }
 
-### 4. Criar entrega (substitua pedido_id pelo _id retornado no pedido)
+### Cadastrar uma entrega
 POST http://localhost:3000/entregas
 Content-Type: application/json
 
 {
-  "pedido_id": "6af7acade5f5458202e43d08",
+  "pedido_id": "6af7b258afaad15463e432cf",
   "endereco": "Rua das Flores, 100"
 }
 
-### 5. Listar entregas
+### Listar as entregas cadastradas
 GET http://localhost:3000/entregas
 
-### 6. Consultar entrega por ID (substitua pelo _id da entrega)
-GET http://localhost:3000/entregas/6af7acb84dc8228da7b06a95
+### Consultar uma entrega pelo ID
+GET http://localhost:3000/entregas/6af7b264700d4b55b7842213
 
-### 7. Consultar entrega por pedido
-GET http://localhost:3000/entregas/pedido/6af7acade5f5458202e43d08
+### Consultar a entrega relacionada a um pedido
+GET http://localhost:3000/entregas/pedido/6af7b258afaad15463e432cf
 
-### 8. Atualizar status da entrega
-PUT http://localhost:3000/entregas/6af7acb84dc8228da7b06a95/status
+### Atualizar o status de uma entrega
+PUT http://localhost:3000/entregas/6af7b264700d4b55b7842213/status
 Content-Type: application/json
 
 {
-  "status": "PREPARANDO"
+  "status": "ENVIADO"
 }
 
-### 9. Teste de erro: pedido inexistente
-POST http://localhost:3000/entregas
-Content-Type: application/json
+### Buscar todos os pedidos
+GET http://localhost:3000/pedidos
 
-{
-  "pedido_id": "000000000000000000000000",
-  "endereco": "Rua Teste, 1"
-}
-
-### 10. Teste de erro: status invalido
-PUT http://localhost:3000/entregas/6af7acb84dc8228da7b06a95/status
-Content-Type: application/json
-
-{
-  "status": "INVALIDO"
-}
+### Buscar todas as entregas
+GET http://localhost:3000/entregas
