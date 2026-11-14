@@ -1,0 +1,25 @@
+### Listar entregas
+GET http://localhost:3004/entregas
+
+### Cadastrar entrega
+POST http://localhost:3004/entregas
+Content-Type: application/json
+
+{
+  "pedido_id": "69135f3c62be9ac0d5f81234",
+  "endereco": "Rua das Flores, 100"
+}
+
+### Buscar entrega por ID
+GET http://localhost:3004/entregas/69135f3c62be9ac0d5f89999
+
+### Buscar entrega por pedido
+GET http://localhost:3004/entregas/pedido/69135f3c62be9ac0d5f81234
+
+### Atualizar status da entrega
+PUT http://localhost:3004/entregas/69135f3c62be9ac0d5f89999/status
+Content-Type: application/json
+
+{
+  "status": "EM_TRANSITO"
+}
